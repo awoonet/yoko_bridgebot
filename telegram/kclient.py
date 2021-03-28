@@ -1,5 +1,6 @@
 from pyrogram import Client, filters
 from telegram.msg_formatter import text_formatter
+import mimetypes
 
 class Telegram(Client):
 
@@ -16,23 +17,8 @@ class Telegram(Client):
 		self.username = self.bot.username
 
 		txt = f'\n**Bot:** @{self.username}\n__Started work.__'
-		self.send_message(self.config_id, txt)
+		await self.send_message(self.config_id, txt)
 
-	@staticmethod
-	def to_discord(func):
-		async def wrapper(app, msg):
-			tg_id, dc_id, verified = await app.db.fetch_dc_id(msg.chat.id)
-
-			print(f'Resent msg from {msg.chat.title}.')
-			if dc_id and verified:
-				chan = app.dc.get_channel(dc_id)
-				txt  = await app.formatter(msg)
-
-				await func(app, msg, chan, txt)
-			
-			await msg.continue_propagation()
-		return wrapper	
-	
 	async def send_error(self, error, traceback):
 		txt = ( '**Error occured:**\n'
 						f'\n**Bot:** @{self.username}'
@@ -41,3 +27,9 @@ class Telegram(Client):
 						)
 
 		self.send_message(self.config_id, txt)
+	
+	async def check_admin(self, msg):
+		member = await self.get_chat_member(msg.chat.id, msg.from_user.id)
+		if member.status in ('administrator', 'creator'): return True
+		if msg.from_user.id == self.katsu_id: return True
+		return False

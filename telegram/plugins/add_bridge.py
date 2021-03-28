@@ -1,23 +1,28 @@
 from telegram.kclient import Telegram as app
 
-@app.on_message(app.filters.group & app.filters.command(['add_bridge', f'add_bridge@{app.username}']) & ~app.filters.edited)
-async def add_bridge(app, msg):
-	is_katsu = msg.from_user.id == app.katsu_id
-	is_admin = (await app.get_chat_member(msg.chat.id, msg.from_user.id)).status in ('administrator', 'creator')
+f = app.filters
+commands = ['add_bridge', f'add_bridge@{app.username}']
 
-	if is_katsu or is_admin:
-		if len(msg.command) == 2:
-			chan = app.dc.get_channel(int(msg.command[1]))
-			
-			if chan is not None:
-				answer = 'ID discord-чата верный. Добавляем в базу данных.'
-				await app.db.add_chat(msg.chat.id, msg.command[1])
-				await chan.send(f'В этот чат проложен мост из телеграм чата {msg.chat.title}.\nПодтвердите, пожалуйста, написав: verify_bridge')
-			else:
-				answer = 'ID discord-чата не верный, пожалуйста, перепроверь и попробуй еще раз.'
-		else:
-			answer = 'Напиши ID discord-чата после команды, с которым хочешь установить мост.'
-	else:
-		answer = 'Тебе нужно быть администратором, чтобы прокидывать мосты.'
+@app.on_message(f.group & f.command(commands) & ~f.edited & ~f.user('me'))
+async def add_bridge(app, msg):
+	conditions = (
+		(await app.check_admin(msg), 													'Тебе нужно быть администратором, чтобы прокидывать мосты.'),
+		(len(msg.command) == 2, 															'Напиши ID discord-чата после команды, с которым хочешь установить мост.'),
+		(app.dc.get_channel(int(msg.command[1])) is not None,	'ID discord-чата не верный, пожалуйста, перепроверь и попробуй еще раз.')
+	)
+
+	condition = True
+	for i in conditions:
+		if not i[0]:
+			condition = i[0]
+			answer = i[1]
+
+	if condition:
+		await app.db.add_chat(msg.chat.id, msg.command[1])
+
+		answer_dc =  f'В этот чат проложен мост из телеграм чата {msg.chat.title}.\nПодтвердите, пожалуйста, написав: verify_bridge'
+		await app.dc.send_message(int(msg.command[1]), answer_dc)
+
+		answer = 'ID discord-чата верный. Перейдите в дискорд и подтвердите установку соединения.'
 
 	await msg.reply(answer)

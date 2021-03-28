@@ -1,46 +1,53 @@
-import discord, mimetypes
+import discord, logging 
 
 class Discord(discord.Client):
 	katsu_id = 435531611543437312
 	
 	async def on_message(self, msg):
-		if msg.author == self.user:	
-			return False			
+		if msg.author == self.user:	return 			
 
-		else:
-			app = self.tg
-			tg_id, dc_id, verified = await app.db.fetch_tg_id(msg.channel.id)
+		tg_id, dc_id, verified = await self.db.fetch_tg_id(msg.channel.id)
 
-			if tg_id and verified:
-				txt	= f'**{msg.author}**\n{msg.content}'
-									
+		if verified:
+				txt	= f'**{msg.author}**\n{msg.content}'			
 				if msg.content:
 					await app.send_message(tg_id, txt)
 				else:
 					media_url = msg.attachments[0].url
-					await self.send_media(tg_id, media_url, txt)								
-			elif tg_id:
-				await self.add_bridge(self, self.db, msg)
+					await self.send_media(tg_id, media_url, txt)
+		else:
+			await self.add_bridge(self, self.db, msg)
 
-	async def add_bridge(disc, db, msg):
-		chan = disc.get_channel(msg.channel.id)
+	async def add_bridge(self, disc, db, msg):
+		conditions = (
+			(await self.check_admin(msg), 	'Тебе нужно быть администратором, чтобы подтвердить установку моста.'),
+			('verify_bridge' in msg.content,'Подтвердите, пожалуйста, установку моста, написав: verify_bridge'),
+		)
 
-		is_owner = msg.author.id == chan.guild.owner_id
-		is_katsu = msg.author.id == self.katsu_id
+		condition = True
+		for i in conditions:
+			if not i[0]:
+				condition = i[0]
+				answer = i[1]
 
-		if is_owner or is_katsu:
-
-			if 'verify_bridge' in msg.content:
+		if condition:
 				await db.verify_chat(msg.channel.id)
 				answer = 'Подтверждено, мост проложен.'
-			else:
-				answer = "Подтвердите, пожалуйста, написав: verify_bridge"
-		else:
-			answer = "Нужно быть владельцем сервера, чтобы подтвердить установку моста."
 
-		await chan.send(answer)
+		await self.send_message(msg.channel.id, answer)
+
+	async def send_message(self, chat_id: int, txt: str, file=None):
+		if file is not None:	
+			file = discord.File(fp=file)
+		else:			
+			await self.get_channel(chat_id).send(content=txt, file=file)
+
+	async def check_admin(self, msg):
+		if msg.author.guild_permissions.administrator: return True
+		if msg.author.id == self.katsu_id: return True
+		return False
 	
-	async def send_media(self, chat_id, url, txt):
+	async def send_media(self, chat_id: int, url: str, txt: str):
 		app = self.tg
 		media_type = (mimetypes.guess_type(url=url))[0]
 
