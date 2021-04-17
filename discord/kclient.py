@@ -1,4 +1,7 @@
-import discord, logging, mimetypes
+import logging
+import mimetypes
+
+import discord
 
 w = logging.warning
 class Discord(discord.Client):
@@ -7,17 +10,26 @@ class Discord(discord.Client):
 	async def on_message(self, msg):
 		if msg.author == self.user:	return 			
 		tg_id, dc_id, verified = await self.db.fetch_tg_id(msg.channel.id)
-		if verified:
-			txt	= f'**{msg.author.name}:** {msg.content}'
 
-			if msg.content:
-				await self.tg.send_message(chat_id=tg_id, text=txt)
-			else:
-				media_url = msg.attachments[0].url
-				await self.send_media(tg_id, media_url, txt)
-		elif tg_id:
-			await self.add_bridge(self, self.db, msg)
-	
+		try:	
+			if '/embed' in msg.content:
+				embed = discord.Embed()
+				embed.description = (msg.content).replace('/embed ', '') 
+				await msg.reply(embed=embed)
+		
+			elif verified:
+				txt	= f'**{msg.author.name}:** {msg.content}'
+
+				if msg.content:
+					await self.tg.send_message(chat_id=tg_id, text=txt)
+				else:
+					media_url = msg.attachments[0].url
+					await self.send_media(tg_id, media_url, txt)
+			elif tg_id:
+				await self.add_bridge(self, self.db, msg)
+		except Exception as e:
+			print(e, flush=True)
+
 	async def send_media(self, chat_id, url, txt):
 		media_type = (mimetypes.guess_type(url=url))[0]
 
