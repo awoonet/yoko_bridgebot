@@ -1,8 +1,8 @@
-FROM python:3.8-slim-buster
-WORKDIR /app/
-COPY ./pyrogram.txt ./
-RUN ["pip3", "install", "-r", "pyrogram.txt"]
-COPY ./discord.txt ./
-RUN ["pip3", "install", "-r", "discord.txt"]
+FROM python:slim-buster
+RUN mkdir /app
+WORKDIR /app
+COPY ./requirements.txt .
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install -r requirements.txt
 COPY . .
-CMD ["python3", "-m", "bot"]
+CMD [ "python3", "app.py" ]

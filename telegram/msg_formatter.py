@@ -1,4 +1,5 @@
 from discord import Embed
+import re
 
 async def fetch_text(msg):
 	"""Возвращает caption, text или ничего из сообщения"""
@@ -9,10 +10,8 @@ async def fetch_text(msg):
 async def fetch_name(user, ):
 	"""Возвращает username, имя с фамилией или просто имя 
 	отформатированное в соответствии с полученной командой."""
-	if user.username is not None:
-		un = f"@{user.username}" 
-	elif user.last_name is not None:
-		un = f"{user.first_name} {user._last.name}"
+	if user.last_name is not None:
+		un = f"{user.first_name} {user.last_name}"
 	else:
 		un = user.first_name		
 	return un
@@ -31,7 +30,7 @@ async def format_msg(msg):
 	name = await fetch_name(msg.from_user)
 	text = await fetch_text(msg)
 	fwd  = await forwarded(msg)
-	return f'**[{name}]**: {fwd}{text}'
+	return f'**{name}:** {fwd}{text}'
 	
 async def reply_msg(msg):
 	if msg.reply_to_message is not None: 
@@ -44,16 +43,16 @@ async def text_formatter(self, msg):
 	msg = await format_msg(msg)
 	
 	content, to_embed = '', ''
-	
-	if rpl:
-		to_embed+=rpl
 
-	if len(msg) > 160:
+	if re.search(r'\[.+\]\(.+\)', msg):
 		to_embed+=msg
 		content=None
 	else:
 		content+=msg
 	
+	if rpl:
+		to_embed+=rpl
+
 	if to_embed:
 		embed = Embed()
 		embed.description = to_embed 

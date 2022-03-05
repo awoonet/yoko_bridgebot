@@ -1,3 +1,7 @@
+#Pyrogram
+Pyrogram==1.4.7
+TgCrypto==1.2.3
+
 #Discord
 aiohttp==3.7.4.post0
 async-timeout==3.0.1
@@ -9,3 +13,6 @@ multidict==5.1.0
 typing-extensions==3.7.4.3
 yarl==1.6.3
 pynacl==1.4.0
+
+psycopg2==2.9.3
+python-dotenv==0.19.2

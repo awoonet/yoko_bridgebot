@@ -1,6 +1,9 @@
-from pyrogram import Client, filters
-from telegram.msg_formatter import text_formatter
 import mimetypes
+
+from pyrogram import Client, filters
+
+from classes.lib						import turn_on
+from telegram.msg_formatter import text_formatter
 
 class Telegram(Client):
 
@@ -13,11 +16,9 @@ class Telegram(Client):
 	async def kstart(self):
 		await self.start()
 
-		self.bot = await self.get_me()
+		self.bot = await turn_on(self)
 		self.username = self.bot.username
 
-		txt = f'\n**Bot:** @{self.username}\n__Started work.__'
-		await self.send_message(self.config_id, txt)
 
 	async def send_error(self, error, traceback):
 		txt = ( '**Error occured:**\n'
