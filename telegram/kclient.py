@@ -14,15 +14,11 @@ class Telegram(Client):
     filters = filters
     formatter = text_formatter
 
-    def __init__(self):
-        super().__init__(
-            "session/yoko", env("API_ID"), env("API_HASH"), bot_token=env("TG_TOKEN")
-        )
+    async def kstart(self):
+        await self.start()
 
-    async def start(self):
-        await super().start()
-
-        self.bot = await turn_on(self)
+        self.bot = await self.get_me()
+        await turn_on(self)
         self.username = self.bot.username
 
     async def send_error(self, error, traceback):

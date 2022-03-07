@@ -18,8 +18,7 @@ async def find_ip():
 
 
 async def turn_on(app):
-    bot = await app.get_me()
-
+    bot = app.bot
     json = await find_ip()
     a = (
         "**Turned on bot:** \n\n"
@@ -31,5 +30,3 @@ async def turn_on(app):
     )
 
     await app.send_message(app.config_id, a)
-
-    return bot

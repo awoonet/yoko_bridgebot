@@ -1,10 +1,9 @@
 from telegram.kclient import Telegram as app
 
 f = app.filters
-commands = ["add_bridge", f"add_bridge@{app.username}"]
 
 
-@app.on_message(f.group & f.command(commands) & ~f.edited & ~f.user("me"))
+@app.on_message(f.group & f.command(["add_bridge"]) & ~f.edited & ~f.user("me"))
 async def add_bridge(app, msg):
     conditions = (
         (
@@ -22,7 +21,7 @@ async def add_bridge(app, msg):
     )
 
     condition = True
-    for i in conditions:
+    async for i in conditions:
         if not i[0]:
             condition = i[0]
             answer = i[1]
