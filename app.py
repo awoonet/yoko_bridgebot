@@ -6,8 +6,6 @@ from telegram.kclient import Telegram as app
 from discord.kclient import Discord as disc
 from classes.psql import Database as psql
 
-logging.basicConfig(level=logging.INFO)
-
 load_dotenv()
 
 db = psql()
