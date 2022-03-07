@@ -1,11 +1,12 @@
 from os import getenv as env
-import psycopg2
+import logging, psycopg2
 import urllib.parse as urlparse
 
 
 class Database:
     def __init__(self):
         self.conn = psycopg2.connect(**self.parse_url())
+        logging.info("DB connection open")
 
     @staticmethod
     def parse_url():
@@ -47,6 +48,7 @@ class Database:
         await self.change_db(
             "CREATE UNIQUE INDEX IF NOT EXISTS id_index ON ids(telegram, discord);"
         )
+        logging.info("DB initialized table")
 
     async def add_chat(self, tg_id, dc_id):
         await self.change_db(

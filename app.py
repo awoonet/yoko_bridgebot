@@ -7,37 +7,29 @@ from classes.psql import Database as psql
 import classes, asyncio, logging, traceback
 
 load_dotenv()
-db = psql()
-dc = disc()
-tg = app("session/yoko", env("API_ID"), env("API_HASH"), bot_token=env("TG_TOKEN"))
 
 
-async def main():
+async def main(tg, dc, db):
     try:
         await db.init_table()
-        logging.warning("DB connection open!")
-
-        tg.db, dc.db = db, db
-        tg.dc, dc.tg = dc, tg
-
-        await tg.kstart()
+        await tg.start()
         await dc.start(env("DC_TOKEN"))
-
+    except KeyboardInterrupt:
+        await dc.logout()
+        await tg.stop()
+        await db.close()
     except Exception as e:
         tg.send_error(e, traceback.format_exc())
         logging.exception("Exception occurred")
 
 
-try:
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+if __name__ == "__main__":
 
-except KeyboardInterrupt:
-    loop.run_until_complete(tg.stop())
-    loop.run_until_complete(dc.logout())
-    loop.run_until_complete(db.close())
-    loop.stop()
+    db = psql()
+    dc = disc()
+    tg = app()
 
-finally:
-    loop.close()
+    tg.db, dc.db = db, db
+    tg.dc, dc.tg = dc, tg
+
+    asyncio.run(main(tg, dc, db))
