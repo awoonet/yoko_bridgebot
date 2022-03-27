@@ -16,8 +16,9 @@ tg = app("session/yoko", env("API_ID"), env("API_HASH"), bot_token=env("TG_TOKEN
 async def main():
     try:
         await db.init_table()
+        logging.warning("DB connection open!")
 
-        tg.db, dc.db = db, db
+        tg.db = dc.db = db
         tg.dc, dc.tg = dc, tg
 
         await tg.kstart()
@@ -41,19 +42,3 @@ except KeyboardInterrupt:
 
 finally:
     loop.close()
-
-
-# if __name__ == "__main__":
-#     # tg.run(main(tg, dc, db))
-
-
-#     tg.db, dc.db = db, db
-#     tg.dc, dc.tg = dc, tg
-#     loop = asyncio.new_event_loop()
-#     # task = asyncio.gather(db.init_table(), dc.start(env("DC_TOKEN")), tg.start())
-#     # loop.run_until_complete(task)
-
-#     loop.create_task(dc.start(env("DC_TOKEN")))
-#     loop.create_task(tg.kstart())
-#     loop.create_task(db.init_table())
-#     loop.run_forever()
