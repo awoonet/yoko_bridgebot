@@ -12,14 +12,17 @@ async def fetch_text(msg):
         return ""
 
 
-async def fetch_name(user):
+async def fetch_name(msg):
     """Возвращает username, имя с фамилией или просто имя
     отформатированное в соответствии с полученной командой."""
-    if user.last_name is not None:
-        un = f"{user.first_name} {user.last_name}"
-    else:
-        un = user.first_name
-    return un
+    if msg.from_user is not None:
+        user = msg.from_user
+        if user.last_name is not None:
+            return f"{user.first_name} {user.last_name}"
+        else:
+            return user.first_name
+    elif msg.sender_chat is not None:
+        return msg.sender_chat.title
 
 
 async def forwarded(msg):
@@ -34,7 +37,7 @@ async def forwarded(msg):
 
 
 async def format_msg(msg):
-    name = await fetch_name(msg.from_user)
+    name = await fetch_name(msg)
     text = await fetch_text(msg)
     fwd = await forwarded(msg)
     return f"**{name}:** {fwd}{text}"
