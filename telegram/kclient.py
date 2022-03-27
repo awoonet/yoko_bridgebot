@@ -1,6 +1,7 @@
 from os import getenv as env
 
 from pyrogram import Client, filters
+from pyrogram.types import Message
 
 from classes.lib import turn_on
 from telegram.msg_formatter import text_formatter
@@ -21,7 +22,7 @@ class Telegram(Client):
         await turn_on(self)
         self.username = self.bot.username
 
-    async def send_error(self, error, traceback):
+    async def send_error(self, error, traceback) -> str:
         txt = (
             "**Error occured:**\n"
             f"\n**Bot:** @{self.username}"
@@ -31,10 +32,8 @@ class Telegram(Client):
 
         self.send_message(self.config_id, txt)
 
-    async def check_admin(self, msg):
+    async def check_admin(self, msg: Message) -> bool:
         member = await self.get_chat_member(msg.chat.id, msg.from_user.id)
-        if member.status in ("administrator", "creator"):
-            return True
-        if msg.from_user.id == self.katsu_id:
-            return True
-        return False
+        admin_status = ("administrator", "creator")
+
+        member.status in admin_status or msg.from_user.id == self.katsu_id

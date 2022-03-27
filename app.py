@@ -10,7 +10,13 @@ load_dotenv()
 
 db = psql()
 dc = disc()
-tg = app("session/yoko", env("API_ID"), env("API_HASH"), bot_token=env("TG_TOKEN"))
+tg = app(
+    "session/yoko",
+    env("API_ID"),
+    env("API_HASH"),
+    bot_token=env("TG_TOKEN"),
+    plugins={"root":"telegram"}
+)
 
 
 async def main():

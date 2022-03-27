@@ -1,10 +1,11 @@
+from pyrogram.types import Message
 from telegram.kclient import Telegram as app
 
 f = app.filters
 
 
 @app.on_message(f.group & f.command(["add_bridge"]) & ~f.edited & ~f.user("me"))
-async def add_bridge(app, msg):
+async def add_bridge(app, msg: Message):
     conditions = (
         (
             await app.check_admin(msg),

@@ -1,7 +1,7 @@
 import time, aiohttp
 
 
-async def find_ip():
+async def find_ip() -> str:
     async with aiohttp.ClientSession() as client:
         async with client.request("GET", "http://ip-api.com/json/") as response:
             try:

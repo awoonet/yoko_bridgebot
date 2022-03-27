@@ -1,8 +1,9 @@
+from pyrogram.types import Message
 from discord import Embed
 import re
 
 
-async def fetch_text(msg):
+async def fetch_text(msg: Message) -> str:
     """Возвращает caption, text или ничего из сообщения"""
     if msg.text is not None:
         return msg.text.markdown.replace("__", "_")
@@ -12,9 +13,11 @@ async def fetch_text(msg):
         return ""
 
 
-async def fetch_name(msg):
-    """Возвращает username, имя с фамилией или просто имя
-    отформатированное в соответствии с полученной командой."""
+async def fetch_name(msg: Message) -> str:
+    """
+    Возвращает username, имя с фамилией или просто имя
+    отформатированное в соответствии с полученной командой.
+    """
     if msg.from_user is not None:
         user = msg.from_user
         if user.last_name is not None:
@@ -25,32 +28,33 @@ async def fetch_name(msg):
         return msg.sender_chat.title
 
 
-async def forwarded(msg):
-    answer = ""
+async def forwarded(msg: Message) -> str:
     if msg.forward_from is not None:
-        answer = f"от пользователя: {await fetch_name(msg.forward_from)}"
+        return (
+            f"\n**Переслано от пользователя: {await fetch_name(msg.forward_from)}**\n"
+        )
     elif msg.forward_sender_name is not None:
-        answer = f"от пользователя: {msg.forward_sender_name}"
+        return f"\n**Переслано от пользователя: {msg.forward_sender_name}**\n"
     elif msg.forward_from_chat is not None:
-        answer = f"из канала: {msg.forward_from_chat.title}"
-    return f"\n**Переслано {answer}**\n" if answer else ""
+        return f"\n**Переслано из канала: {msg.forward_from_chat.title}**\n"
+    return ""
 
 
-async def format_msg(msg):
+async def format_msg(msg: Message) -> str:
     name = await fetch_name(msg)
     text = await fetch_text(msg)
     fwd = await forwarded(msg)
     return f"**{name}:** {fwd}{text}"
 
 
-async def reply_msg(msg):
+async def reply_msg(msg: Message) -> str:
     if msg.reply_to_message is not None:
         text = await format_msg(msg.reply_to_message)
         return f"В ответ на сообщение:\n{text}\n\n"
     return ""
 
 
-async def text_formatter(self, msg):
+async def text_formatter(self, msg: Message) -> tuple:
     rpl = await reply_msg(msg)
     msg = await format_msg(msg)
 
