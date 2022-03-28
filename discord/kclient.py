@@ -12,13 +12,12 @@ class Discord(discord.Client):
     async def on_message(self, msg):
         if msg.author == self.user:
             return
-        tg_id, dc_id, verified = await self.db.fetch_tg_id(msg.channel.id)
+
+        tg_id, _, verified = await self.db.fetch_tg_id(msg.channel.id)
 
         try:
             if "/embed" in msg.content:
-                embed = discord.Embed()
-                embed.description = (msg.content).replace("/embed ", "")
-                await msg.reply(embed=embed)
+                await self.send_embed(msg)
 
             elif verified:
                 txt = f"**{msg.author.name}:** {msg.content}"
@@ -28,6 +27,7 @@ class Discord(discord.Client):
                 else:
                     media_url = msg.attachments[0].url
                     await self.send_media(tg_id, media_url, txt)
+
             elif tg_id:
                 await self.add_bridge(self, self.db, msg)
         except Exception as e:
@@ -78,6 +78,12 @@ class Discord(discord.Client):
             await self.get_channel(chat_id).send(content=txt, file=file)
 
     async def check_admin(self, msg):
-        return (
-            msg.author.guild_permissions.administrator or msg.author.id == self.katsu_id
-        )
+        is_admin = msg.author.guild_permissions.administrator
+        is_katsu = msg.author.id == self.katsu_id
+        return is_admin or is_katsu
+
+    @staticmethod
+    async def send_embed(msg):
+        embed = discord.Embed()
+        embed.description = (msg.content).replace("/embed ", "")
+        await msg.reply(embed=embed)
