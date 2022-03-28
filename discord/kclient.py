@@ -34,18 +34,21 @@ class Discord(discord.Client):
             print(e, flush=True)
 
     async def send_media(self, chat_id, url, txt):
+        app = self.tg
         media_type = (mimetypes.guess_type(url=url))[0]
 
+        vars = dict(chat_id=chat_id, caption=txt)
+
         if "gif" in media_type:
-            await self.tg.send_animation(chat_id=chat_id, animation=url, caption=txt)
+            await app.send_animation(animation=url, **vars)
         elif "image" in media_type:
-            await self.tg.send_photo(chat_id=chat_id, photo=url, caption=txt)
+            await app.send_photo(photo=url, **vars)
         elif "audio" in media_type:
-            await self.tg.send_audio(chat_id=chat_id, audio=url, caption=txt)
+            await app.send_audio(audio=url, **vars)
         elif "video" in media_type:
-            await self.tg.send_video(chat_id=chat_id, video=url, caption=txt)
+            await app.send_video(video=url, **vars)
         else:
-            await self.tg.send_document(chat_id=chat_id, document=url, caption=txt)
+            await app.send_document(document=url, **vars)
 
     async def add_bridge(self, _, db, msg):
         conditions = (
