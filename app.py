@@ -2,42 +2,24 @@ from os import getenv as env
 import asyncio, logging, traceback
 from dotenv import load_dotenv
 
-from telegram.kclient import Telegram as app
-from discord.kclient import Discord as disc
-from classes.psql import Database as psql
+from pyro.client import Telegram as pyro
+from disc.client import Discord as disc
+from db.psql import Database as psql
 
 load_dotenv()
 
 db = psql()
 dc = disc()
-tg = app(
-    "session/yoko",
-    env("API_ID"),
-    env("API_HASH"),
-    bot_token=env("TG_TOKEN"),
-    plugins={"root":"telegram"}
-)
-
-
-async def main():
-    try:
-        await db.init_table()
-        logging.warning("DB connection open!")
-
-        tg.db = dc.db = db
-        tg.dc, dc.tg = dc, tg
-
-        await tg.kstart()
-        await dc.start(env("DC_TOKEN"))
-
-    except Exception as e:
-        tg.send_error(e, traceback.format_exc())
-        logging.exception("Exception occurred")
-
+tg = pyro()
+tg.db = dc.db = db
+tg.dc, dc.tg = dc, tg
 
 try:
     loop = asyncio.get_event_loop()
-    loop.create_task(main())
+    # loop.create_task(main())
+    loop.create_task(db.init_table())
+    loop.create_task(tg.start())
+    loop.create_task(dc.start(env("DC_TOKEN")))
     loop.run_forever()
 
 except KeyboardInterrupt:

@@ -1,38 +1,6 @@
-import logging
-import mimetypes
+import logging, mimetypes, discord
 
-import discord
-
-w = logging.warning
-
-
-class Discord(discord.Client):
-    katsu_id = 435531611543437312
-
-    async def on_message(self, msg):
-        if msg.author == self.user:
-            return
-
-        tg_id, _, verified = await self.db.fetch_tg_id(msg.channel.id)
-
-        try:
-            if "/embed" in msg.content:
-                await self.send_embed(msg)
-
-            elif verified:
-                txt = f"**{msg.author.name}:** {msg.content}"
-
-                if msg.content:
-                    await self.tg.send_message(chat_id=tg_id, text=txt)
-                else:
-                    media_url = msg.attachments[0].url
-                    await self.send_media(tg_id, media_url, txt)
-
-            elif tg_id:
-                await self.add_bridge(self, self.db, msg)
-        except Exception as e:
-            print(e, flush=True)
-
+class Helpers:
     async def send_media(self, chat_id, url, txt):
         app = self.tg
         media_type = (mimetypes.guess_type(url=url))[0]

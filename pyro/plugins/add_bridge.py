@@ -1,10 +1,11 @@
 from pyrogram.types import Message
-from telegram.kclient import Telegram as app
+from pyro.client import Telegram as app
 
 f = app.filters
 
 
 @app.on_message(f.group & f.command(["add_bridge"]) & ~f.edited & ~f.user("me"))
+@app.tg_error_catcher
 async def add_bridge(app, msg: Message):
     conditions = (
         (
