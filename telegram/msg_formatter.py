@@ -1,3 +1,4 @@
+from typing import Union
 from pyrogram.types import Message
 from discord import Embed
 import re
@@ -74,7 +75,7 @@ async def guess_for_embed(msg: Message) -> tuple:
     return (content, to_embed)
 
 
-async def make_embed_discord(text: str) -> Embed | None:
+async def make_embed_discord(text: str) -> Union[Embed, None]:
     embed = None
     if text:
         embed = Embed()
