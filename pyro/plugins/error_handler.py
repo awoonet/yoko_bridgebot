@@ -86,7 +86,7 @@ class ErrorHandler:
                 "Voice": msg.voice,
                 "Video note": msg.video_note,
             }
-            for name, msg_type in msg_types:
+            for name, msg_type in msg_types.items():
                 if not_none(msg_type):
                     txt += f"\n**{name}**:_{msg_type.file_id}__"
 
