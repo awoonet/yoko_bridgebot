@@ -1,3 +1,4 @@
+import logging
 from pyrogram.types import Message
 from pyro.client import Telegram as app
 
@@ -8,17 +9,11 @@ f = app.filters
 @app.error_catcher
 async def add_bridge(app, msg: Message):
     conditions = (
-        (
-            await app.check_admin(msg),
-            "Тебе нужно быть администратором, чтобы прокидывать мосты.",
-        ),
-        (
-            len(msg.command) == 2,
-            "Напиши ID discord-чата после команды, с которым хочешь установить мост.",
-        ),
+        (await app.check_admin(msg), "telegram.error.establish"),
+        (len(msg.command) == 2, "telegram.error.no_id"),
         (
             app.dc.get_channel(int(msg.command[1])) is not None,
-            "ID discord-чата не верный, пожалуйста, перепроверь и попробуй еще раз.",
+            "telegram.error.failed.id",
         ),
     )
 
@@ -26,16 +21,17 @@ async def add_bridge(app, msg: Message):
     async for i in conditions:
         if not i[0]:
             condition = i[0]
-            answer = i[1]
+            response = app.t(i[1])
 
     if condition:
-        print(
+        logging.warning(
             f"tg={msg.chat.id} type={type(msg.chat.id)}, dc={msg.command[1]} type={type(msg.command[1])}"
         )
         await app.db.add_chat(msg.chat.id, msg.command[1])
 
-        answer_dc = f"В этот чат проложен мост из телеграм чата {msg.chat.title}.\nПодтвердите, пожалуйста, написав: verify_bridge"
-        await app.dc.send_message(int(msg.command[1]), answer_dc)
-        answer = "ID discord-чата верный. Перейдите в дискорд и подтвердите установку соединения."
+        response = app.t("discord.verify", msg.chat.title)
+        await app.dc.send_message(int(msg.command[1]), response)
 
-    await msg.reply(answer)
+        response = app.t("telegram.ok_id")
+
+    await msg.reply(response)

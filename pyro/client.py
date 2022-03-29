@@ -17,7 +17,7 @@ class Telegram(Client, ErrorHandler):
     filters = filters
     formatter = text_formatter
 
-    def __init__(self):
+    def __init__(self, t, db):
         super().__init__(
             "session/yoko",
             env("API_ID"),
@@ -25,6 +25,8 @@ class Telegram(Client, ErrorHandler):
             bot_token=env("TG_TOKEN"),
             plugins={"root": "pyro"},
         )
+        self.t = t
+        self.db = db
 
     async def start(self):
         await super().start()
@@ -33,7 +35,7 @@ class Telegram(Client, ErrorHandler):
         await turn_on(self)
         self.username = self.bot.username
 
-        logging.warning(f" Telegram bot started as @{self.bot.username}")
+        logging.warning(self.t("telegram.start", self.bot.username))
 
     async def check_admin(self, msg: Message) -> bool:
         member = await self.get_chat_member(msg.chat.id, msg.from_user.id)

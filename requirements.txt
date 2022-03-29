@@ -4,3 +4,4 @@ pynacl==1.5.0
 
 aiohttp
 psycopg2-binary==2.9.3
+coloredlogs==15.0.1

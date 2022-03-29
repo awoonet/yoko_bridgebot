@@ -4,9 +4,10 @@ import urllib.parse as urlparse
 
 
 class Database:
-    def __init__(self):
+    def __init__(self, t):
+        self.t = t
         self.conn = psycopg2.connect(**self.parse_url())
-        logging.warning(" DB connection open")
+        logging.warning(self.t("db.start"))
 
     @staticmethod
     def parse_url():
@@ -21,7 +22,7 @@ class Database:
 
     async def close(self):
         self.conn.close()
-        logging.warning(" DB connection closed")
+        logging.warning(self.t("db.close"))
 
     async def change_db(self, command, ids=False):
         cur = self.conn.cursor()
@@ -48,7 +49,7 @@ class Database:
         await self.change_db(
             "CREATE UNIQUE INDEX IF NOT EXISTS id_index ON ids(telegram, discord);"
         )
-        logging.warning(" DB table initialized")
+        logging.warning(self.t("db.init"))
 
     async def add_chat(self, tg_id, dc_id):
         await self.change_db(

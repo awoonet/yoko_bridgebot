@@ -8,8 +8,13 @@ w = logging.warning
 class Discord(discord.Client, Helpers):
     katsu_id = 435531611543437312
 
+    def __init__(self, t, db):
+        super().__init__()
+        self.t = t
+        self.db = db
+
     async def on_ready(self):
-        logging.warning(f" Discord bot started as {self.user}")
+        logging.warning(self.t("discord.start", self.user))
 
     async def on_message(self, msg):
         if msg.author == self.user:

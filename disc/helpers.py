@@ -1,5 +1,6 @@
 import logging, mimetypes, discord
 
+
 class Helpers:
     async def send_media(self, chat_id, url, txt):
         app = self.tg
@@ -20,27 +21,21 @@ class Helpers:
 
     async def add_bridge(self, _, db, msg):
         conditions = (
-            (
-                await self.check_admin(msg),
-                "Тебе нужно быть администратором, чтобы подтвердить установку моста.",
-            ),
-            (
-                "verify_bridge" in msg.content,
-                "Подтвердите, пожалуйста, установку моста, написав: verify_bridge",
-            ),
+            (await self.check_admin(msg), "discord.error.verify"),
+            ("verify_bridge" in msg.content, "discord.verify_bridge"),
         )
 
         condition = True
         for i in conditions:
             if not i[0]:
                 condition = i[0]
-                answer = i[1]
+                response = self.t(i[1])
 
         if condition:
             await db.verify_chat(msg.channel.id)
-            answer = "Подтверждено, мост проложен."
+            response = self.t("discord.verified")
 
-        await self.send_message(msg.channel.id, answer)
+        await self.send_message(msg.channel.id, response)
 
     async def send_message(self, chat_id: int, txt: str, file=None):
         if file is not None:

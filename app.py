@@ -1,19 +1,22 @@
 from os import getenv as env
-import asyncio, logging
+import asyncio, logging, coloredlogs
 
 from dotenv import load_dotenv
 
 from pyro.client import Telegram as pyro
 from disc.client import Discord as disc
 from db.psql import Database as psql
+from functions.load_i18n import load_i18n
 
 load_dotenv()
+coloredlogs.install()
 logging.basicConfig(level=logging.INFO)
 
-db = psql()
-dc = disc()
-tg = pyro()
-tg.db = dc.db = db
+t = load_i18n()
+db = psql(t)
+dc = disc(t, db)
+tg = pyro(t, db)
+
 tg.dc, dc.tg = dc, tg
 
 try:
