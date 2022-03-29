@@ -14,14 +14,13 @@ class Discord(discord.Client, Helpers):
     async def on_message(self, msg):
         if msg.author == self.user:
             return
-
-        tg_id, _, verified = await self.db.fetch_tg_id(msg.channel.id)
-
         try:
             if "/embed" in msg.content:
                 await self.send_embed(msg)
 
-            elif verified:
+            tg_id, _, verified = await self.db.fetch_tg_id(msg.channel.id)
+
+            if verified:
                 txt = f"**{msg.author.name}:** {msg.content}"
 
                 if msg.content:

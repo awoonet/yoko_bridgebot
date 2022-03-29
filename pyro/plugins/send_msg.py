@@ -16,15 +16,16 @@ def to_discord(func: Callable) -> Callable:
     async def wrapper(app: app, msg: Message):
         _, dc_id, verified = await app.db.fetch_dc_id(msg.chat.id)
         if verified:
-            await func(
-                app, msg, app.dc.get_channel(int(dc_id)), await app.formatter(msg)
-            )
+            chan = app.dc.get_channel(int(dc_id))
+            msg_text = await app.formatter(msg)
+
+            await func(app, msg, chan, msg_text)
 
     return wrapper
 
 
 @app.on_message(f.group & f.media & ~f.edited & ~f.user("me") & ~f.create(is_animated))
-@app.tg_error_catcher
+@app.error_catcher
 @to_discord
 async def media(_: app, msg: Message, chan, txt):
     file = await msg.download()
@@ -33,7 +34,7 @@ async def media(_: app, msg: Message, chan, txt):
 
 
 @app.on_message(f.group & f.text & ~f.edited & ~f.user("me"))
-@app.tg_error_catcher
+@app.error_catcher
 @to_discord
 async def text(_: app, __: Message, chan, txt):
     await chan.send(content=txt[0], embed=txt[1])

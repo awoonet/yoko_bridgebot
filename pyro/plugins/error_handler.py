@@ -5,13 +5,13 @@ from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 not_none = lambda x: x is not None
 
 
-class TGErrorHandler:
+class ErrorHandler:
     """
     Helper class for send messages if handled
     """
 
     @staticmethod
-    def tg_error_catcher(func: Callable) -> Callable:
+    def error_catcher(func: Callable) -> Callable:
         async def wrapper(app, msg) -> None:
             try:
                 return await func(app, msg)

@@ -1,5 +1,5 @@
 from os import getenv as env
-import asyncio, logging, traceback
+import asyncio
 from dotenv import load_dotenv
 
 from pyro.client import Telegram as pyro

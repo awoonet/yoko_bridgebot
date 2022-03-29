@@ -6,10 +6,10 @@ from pyrogram.types import Message
 
 from pyro.plugins.send_awaking import turn_on
 from pyro.plugins.msg_formatter import text_formatter
-from pyro.plugins.error_handler import TGErrorHandler
+from pyro.plugins.error_handler import ErrorHandler
 
 
-class Telegram(Client, TGErrorHandler):
+class Telegram(Client, ErrorHandler):
 
     katsu_id = 600432868
     config_id = -1001328058005
