@@ -33,7 +33,7 @@ class Telegram(Client, ErrorHandler):
         await turn_on(self)
         self.username = self.bot.username
 
-        logging.warning(f" Telegram bot started as {self.bot.username}")
+        logging.warning(f" Telegram bot started as @{self.bot.username}")
 
     async def check_admin(self, msg: Message) -> bool:
         member = await self.get_chat_member(msg.chat.id, msg.from_user.id)

@@ -1,5 +1,6 @@
 from os import getenv as env
-import asyncio
+import asyncio, logging
+
 from dotenv import load_dotenv
 
 from pyro.client import Telegram as pyro
@@ -7,6 +8,7 @@ from disc.client import Discord as disc
 from db.psql import Database as psql
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
 db = psql()
 dc = disc()
